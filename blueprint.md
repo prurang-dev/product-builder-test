@@ -8,29 +8,27 @@ This document outlines the design and implementation of a simple, modern, and vi
 
 ### **Design & Style**
 
-*   **Layout:** A clean, centered layout that is mobile-responsive.
-*   **Color Palette:** A vibrant and energetic color scheme will be used.
-*   **Typography:** Expressive and clear typography to enhance readability and visual hierarchy.
-*   **Iconography:** Icons will be used to improve user understanding and navigation.
-*   **Visual Effects:** Subtle animations and shadows will be used to create a sense of depth and interactivity.
-*   **Texture:** A subtle noise texture will be applied to the background for a premium feel.
+*   **Framework-less Modern Web:** Built using native Web Components for encapsulation.
+*   **Shadow DOM:** Scoped styling to prevent conflicts.
+*   **Responsive Layout:** Centered using Flexbox with a modern dot-pattern background.
+*   **Typography:** Clean, sans-serif font stack.
+*   **Animations:** Smooth pop-in animations for number circles.
 
 ### **Features**
 
-*   **Number Generation:** Generate 6 unique random numbers between 1 and 45.
-*   **Display:** Display the generated numbers in a clear and visually appealing format.
-*   **Interactivity:** A button to trigger the number generation.
+*   **Unique Number Generation:** Generates 6 unique numbers (1-45).
+*   **Sorted Results:** Numbers are automatically sorted in ascending order.
+*   **Interactive UI:** Modern gradient buttons and animated circles.
 
 ## **Current Plan**
 
-1.  **HTML (`index.html`):**
-    *   Update the title to "Lotto Number Generator".
-    *   Create the basic structure for the application, including a container, title, a placeholder for the numbers, and a button.
-
-2.  **CSS (`style.css`):**
-    *   Implement the design, including layout, colors, typography, and effects.
-    *   Ensure the application is responsive.
-
-3.  **JavaScript (`main.js`):**
-    *   Implement the logic for generating unique random numbers.
-    *   Add an event listener to the button to trigger the generation and display of the numbers.
+1.  **Refactor to Web Components (`main.js`):**
+    *   Implement `LottoGenerator` class extending `HTMLElement`.
+    *   Use Shadow DOM for styles and structure.
+    *   Add sorting logic to generated numbers.
+2.  **Modernize HTML (`index.html`):**
+    *   Use `<script type="module">`.
+    *   Use the custom `<lotto-generator>` tag.
+3.  **Refined Styling (`style.css`):**
+    *   Update background to a subtle dot pattern.
+    *   Ensure proper centering of the component.

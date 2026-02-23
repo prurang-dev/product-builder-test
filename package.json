@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Lotto Number Generator",
   "scripts": {
-    "build": "echo 'No build step required for static site'"
+    "build": "mkdir -p dist && cp index.html style.css main.js dist/"
   },
   "author": "",
   "license": "ISC"

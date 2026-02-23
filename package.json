@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Lotto Number Generator",
   "scripts": {
-    "build": "mkdir -p dist && cp index.html style.css main.js dist/"
+    "build": "mkdir -p dist && cp index.html style.css main.js dist/",
+    "deploy": "npm run build && npx wrangler deploy"
   },
   "author": "",
   "license": "ISC"

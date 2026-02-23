@@ -1,0 +1,10 @@
+{
+  "name": "product-builder-test",
+  "version": "1.0.0",
+  "description": "Lotto Number Generator",
+  "scripts": {
+    "build": "echo 'No build step required for static site'"
+  },
+  "author": "",
+  "license": "ISC"
+}

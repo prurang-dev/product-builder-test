@@ -24,6 +24,20 @@
     z-index: 1000;
 }
 
+.view {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    animation: fadeIn var(--transition-speed) ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 body {
     margin: 0;
     padding: 100px 20px 80px;
@@ -32,7 +46,6 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    gap: 60px;
     background-color: var(--bg-color);
     background-image: 
         radial-gradient(var(--bg-pattern-color) 0.5px, transparent 0.5px),

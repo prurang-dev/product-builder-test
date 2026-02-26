@@ -1,10 +1,6 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "product-builder-test",
-  "compatibility_date": "2026-02-23",
-  "assets": {
-    "directory": "./dist"
-  },
-  "build": {
-    "command": "npm run build"
-  }
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2024-11-01"
 }

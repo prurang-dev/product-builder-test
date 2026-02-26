@@ -133,18 +133,31 @@ class AnimalFaceTest extends HTMLElement {
     async predict(imageElement) {
         if (!this.model) return;
         const prediction = await this.model.predict(imageElement);
+        
+        // Sort predictions by probability (highest first)
+        prediction.sort((a, b) => b.probability - a.probability);
+
         const labelContainer = this.shadowRoot.getElementById('label-container');
         labelContainer.innerHTML = '';
 
+        const labelMap = {
+            '강아지': '🐶 강아지상',
+            '고양이': '🐱 고양이상',
+            'Dog': '🐶 강아지상',
+            'Cat': '🐱 고양이상'
+        };
+
         for (let i = 0; i < prediction.length; i++) {
-            const classPrediction = prediction[i].className;
+            const rawName = prediction[i].className;
+            const classPrediction = labelMap[rawName] || rawName;
             const probability = (prediction[i].probability * 100).toFixed(0);
+            
             const barWrapper = document.createElement('div');
             barWrapper.className = 'bar-wrapper';
             barWrapper.innerHTML = `
-                <div class="label-name">${classPrediction === '강아지' ? '🐶 강아지상' : '🐱 고양이상'}</div>
+                <div class="label-name">${classPrediction}</div>
                 <div class="bar-container">
-                    <div class="bar" style="width: ${probability}%; background: ${prediction[i].probability > 0.5 ? 'linear-gradient(90deg, #6e8efb, #a777e3)' : '#dee2e6'}"></div>
+                    <div class="bar" style="width: ${probability}%; background: ${i === 0 ? 'linear-gradient(90deg, #6e8efb, #a777e3)' : '#dee2e6'}"></div>
                 </div>
                 <div class="percentage">${probability}%</div>
             `;

@@ -173,15 +173,18 @@ class AnimalFaceTest extends HTMLElement {
         const labelMap = { 
             '강아지': '🐶 강아지상', 
             '고양이': '🐱 고양이상', 
-            'Dog': '🐶 강아지상', 
-            'Cat': '🐱 고양이상',
+            'dog': '🐶 강아지상', 
+            'cat': '🐱 고양이상',
             'class1': '🐶 강아지상',
             'class2': '🐱 고양이상'
         };
 
         for (let i = 0; i < prediction.length; i++) {
+            // Normalize class name for mapping: lowercase and remove spaces
             const rawName = prediction[i].className;
-            const classPrediction = labelMap[rawName] || rawName;
+            const normalizedName = rawName.toLowerCase().replace(/\s/g, '');
+            const classPrediction = labelMap[normalizedName] || rawName;
+            
             const probability = (prediction[i].probability * 100).toFixed(0);
             
             const barWrapper = document.createElement('div');

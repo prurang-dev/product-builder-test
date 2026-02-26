@@ -2,15 +2,20 @@
 window.switchView = (viewName) => {
     const homeView = document.getElementById('view-home');
     const animalTestView = document.getElementById('view-animal-test');
+    const animalTestComponent = document.querySelector('animal-face-test');
     
     if (viewName === 'animal-test') {
+        // If already in animal test view, reset it
+        if (animalTestView.style.display === 'flex' && animalTestComponent) {
+            animalTestComponent.reset();
+        }
         homeView.style.display = 'none';
         animalTestView.style.display = 'flex';
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         homeView.style.display = 'flex';
         animalTestView.style.display = 'none';
-        window.scrollTo(0, 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 };
 
@@ -46,20 +51,21 @@ class ThemeToggle extends HTMLElement {
                     background: var(--container-bg);
                     border: 2px solid var(--bg-pattern-color);
                     color: var(--text-color);
-                    padding: 8px 16px;
-                    border-radius: 20px;
+                    padding: 10px 18px;
+                    border-radius: 25px;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     gap: 8px;
                     font-size: 14px;
-                    font-weight: 600;
-                    transition: all var(--transition-speed);
+                    font-weight: 700;
+                    transition: all 0.2s ease-in-out;
                     box-shadow: 0 4px 6px var(--shadow-color);
                 }
                 button:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 6px 12px var(--shadow-color);
+                    box-shadow: 0 6px 15px var(--shadow-color);
+                    border-color: #6e8efb;
                 }
                 .btn-test { background: linear-gradient(135deg, #ff6b6b, #f06595); color: white; border: none; }
                 .icon { font-size: 18px; }
@@ -98,9 +104,13 @@ class AnimalFaceTest extends HTMLElement {
     }
 
     async loadModel() {
-        const modelURL = this.URL + "model.json";
-        const metadataURL = this.URL + "metadata.json";
-        this.model = await tmImage.load(modelURL, metadataURL);
+        try {
+            const modelURL = this.URL + "model.json";
+            const metadataURL = this.URL + "metadata.json";
+            this.model = await tmImage.load(modelURL, metadataURL);
+        } catch (e) {
+            console.error("Model loading failed", e);
+        }
     }
 
     setupEventListeners() {
@@ -113,6 +123,19 @@ class AnimalFaceTest extends HTMLElement {
         if (backBtn) backBtn.addEventListener('click', () => window.switchView('home'));
     }
 
+    reset() {
+        const previewContainer = this.shadowRoot.getElementById('preview-container');
+        const labelContainer = this.shadowRoot.getElementById('label-container');
+        const fileInput = this.shadowRoot.getElementById('file-input');
+        
+        previewContainer.innerHTML = `
+            <span style="font-size: 40px;">📁</span>
+            <div style="color: var(--text-color); font-weight: 600; margin-top: 10px;">사진 클릭하여 업로드</div>
+        `;
+        labelContainer.innerHTML = '';
+        fileInput.value = '';
+    }
+
     async handleFileUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -122,8 +145,9 @@ class AnimalFaceTest extends HTMLElement {
             const img = document.createElement('img');
             img.src = e.target.result;
             img.onload = async () => {
-                this.shadowRoot.getElementById('preview-container').innerHTML = '';
-                this.shadowRoot.getElementById('preview-container').appendChild(img);
+                const previewContainer = this.shadowRoot.getElementById('preview-container');
+                previewContainer.innerHTML = '';
+                previewContainer.appendChild(img);
                 await this.predict(img);
             };
         };
@@ -131,21 +155,17 @@ class AnimalFaceTest extends HTMLElement {
     }
 
     async predict(imageElement) {
-        if (!this.model) return;
+        if (!this.model) {
+            alert("모델이 아직 로딩 중입니다. 잠시만 기다려주세요!");
+            return;
+        }
         const prediction = await this.model.predict(imageElement);
-        
-        // Sort predictions by probability (highest first)
         prediction.sort((a, b) => b.probability - a.probability);
 
         const labelContainer = this.shadowRoot.getElementById('label-container');
         labelContainer.innerHTML = '';
 
-        const labelMap = {
-            '강아지': '🐶 강아지상',
-            '고양이': '🐱 고양이상',
-            'Dog': '🐶 강아지상',
-            'Cat': '🐱 고양이상'
-        };
+        const labelMap = { '강아지': '🐶 강아지상', '고양이': '🐱 고양이상', 'Dog': '🐶 강아지상', 'Cat': '🐱 고양이상' };
 
         for (let i = 0; i < prediction.length; i++) {
             const rawName = prediction[i].className;
@@ -154,6 +174,7 @@ class AnimalFaceTest extends HTMLElement {
             
             const barWrapper = document.createElement('div');
             barWrapper.className = 'bar-wrapper';
+            barWrapper.style.animation = `fadeIn 0.5s ease both ${i * 0.1}s`;
             barWrapper.innerHTML = `
                 <div class="label-name">${classPrediction}</div>
                 <div class="bar-container">
@@ -175,29 +196,25 @@ class AnimalFaceTest extends HTMLElement {
                     max-width: 500px; width: calc(100% - 80px); margin: 0 auto;
                     transition: all var(--transition-speed);
                 }
-                h2 { color: var(--text-color); margin-bottom: 10px; }
-                p { color: var(--text-color); opacity: 0.7; margin-bottom: 30px; }
                 #upload-area {
                     border: 3px dashed var(--bg-pattern-color); border-radius: 15px;
                     padding: 40px 20px; cursor: pointer; transition: all 0.3s ease; margin-bottom: 30px;
                 }
-                #upload-area:hover { border-color: #6e8efb; background-color: rgba(110, 142, 251, 0.05); }
-                #preview-container img { max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 10px 20px var(--shadow-color); }
+                #upload-area:hover { border-color: #6e8efb; background: rgba(110, 142, 251, 0.05); }
+                #preview-container img { max-width: 100%; max-height: 300px; border-radius: 10px; }
                 #label-container { margin-top: 30px; text-align: left; }
                 .bar-wrapper { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
                 .label-name { width: 90px; font-weight: 600; color: var(--text-color); font-size: 14px; }
                 .bar-container { flex-grow: 1; height: 12px; background-color: var(--bg-pattern-color); border-radius: 6px; overflow: hidden; }
-                .bar { height: 100%; transition: width 0.5s ease; }
+                .bar { height: 100%; transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
                 .percentage { width: 40px; text-align: right; font-size: 13px; font-weight: bold; color: var(--text-color); }
                 input[type="file"] { display: none; }
-                .back-btn {
-                    margin-top: 20px; background: none; border: none; color: #6e8efb;
-                    cursor: pointer; font-weight: 600; font-size: 14px; text-decoration: underline;
-                }
+                .back-btn { margin-top: 25px; background: none; border: none; color: #6e8efb; cursor: pointer; font-weight: 600; text-decoration: underline; }
+                @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
             </style>
             <div class="container">
                 <h2>🐶 AI 동물상 테스트 🐱</h2>
-                <p>얼굴 사진을 업로드하여 결과를 확인해보세요!</p>
+                <p>사진을 올려주시면 AI가 분석해 드립니다!</p>
                 <div id="upload-area">
                     <div id="preview-container">
                         <span style="font-size: 40px;">📁</span>
@@ -206,7 +223,7 @@ class AnimalFaceTest extends HTMLElement {
                 </div>
                 <input type="file" id="file-input" accept="image/*">
                 <div id="label-container"></div>
-                <button class="back-btn" id="back-home-btn">← 메인 도구로 돌아가기</button>
+                <button class="back-btn" id="back-home-btn">← 다른 도구 더보기</button>
             </div>
         `;
     }
@@ -220,23 +237,20 @@ class ContactForm extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; width: 100%; }
-                .container {
-                    text-align: left; padding: 40px; background-color: var(--container-bg);
-                    border-radius: 20px; box-shadow: 0 20px 40px var(--shadow-color);
-                    max-width: 500px; width: calc(100% - 80px); margin: 0 auto;
-                }
+                .container { text-align: left; padding: 40px; background: var(--container-bg); border-radius: 20px; box-shadow: 0 20px 40px var(--shadow-color); max-width: 500px; width: calc(100% - 80px); margin: 0 auto; transition: all var(--transition-speed); }
                 h2 { color: var(--text-color); margin-bottom: 25px; text-align: center; }
                 .form-group { margin-bottom: 20px; }
-                label { display: block; margin-bottom: 8px; color: var(--text-color); font-weight: 600; }
-                input, textarea { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--bg-pattern-color); background: var(--bg-color); color: var(--text-color); box-sizing: border-box; }
-                button { width: 100%; background: linear-gradient(135deg, #6e8efb, #a777e3); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 600; }
+                label { display: block; margin-bottom: 8px; color: var(--text-color); font-weight: 600; font-size: 14px; }
+                input, textarea { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--bg-pattern-color); background: var(--bg-color); color: var(--text-color); font-family: inherit; box-sizing: border-box; }
+                button { width: 100%; background: linear-gradient(135deg, #6e8efb, #a777e3); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+                button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4); }
             </style>
             <div class="container">
                 <h2>제휴 문의</h2>
                 <form action="https://formspree.io/f/xojnrkwa" method="POST">
-                    <div class="form-group"><label>성함/기업명</label><input type="text" name="name" required></div>
-                    <div class="form-group"><label>이메일</label><input type="email" name="_replyto" required></div>
-                    <div class="form-group"><label>문의 내용</label><textarea name="message" required></textarea></div>
+                    <div class="form-group"><label>성함/기업명</label><input type="text" name="name" required placeholder="홍길동"></div>
+                    <div class="form-group"><label>이메일 주소</label><input type="email" name="_replyto" required placeholder="example@email.com"></div>
+                    <div class="form-group"><label>문의 내용</label><textarea name="message" required placeholder="내용을 입력해주세요."></textarea></div>
                     <button type="submit">문의 보내기</button>
                 </form>
             </div>
@@ -272,14 +286,16 @@ class LottoGenerator extends HTMLElement {
         this.shadowRoot.innerHTML = `
             <style>
                 :host { display: block; width: 100%; }
-                .container { text-align: center; padding: 40px; background: var(--container-bg); border-radius: 20px; box-shadow: 0 20px 40px var(--shadow-color); max-width: 500px; width: calc(100% - 80px); margin: 0 auto; }
+                .container { text-align: center; padding: 40px; background: var(--container-bg); border-radius: 20px; box-shadow: 0 20px 40px var(--shadow-color); max-width: 500px; width: calc(100% - 80px); margin: 0 auto; transition: all var(--transition-speed); }
+                h1 { color: var(--text-color); margin-bottom: 30px; }
                 #numbers-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
                 .number-circle { width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(135deg, #6e8efb, #a777e3); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; animation: pop 0.5s both; }
-                button { background: linear-gradient(135deg, #00b09b, #96c93d); color: white; border: none; padding: 16px 40px; border-radius: 30px; cursor: pointer; font-weight: 600; }
+                button { background: linear-gradient(135deg, #00b09b, #96c93d); color: white; border: none; padding: 16px 40px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+                button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 176, 155, 0.3); }
                 @keyframes pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
             </style>
             <div class="container">
-                <h1>Lotto Numbers</h1>
+                <h1>Lotto Lucky Numbers</h1>
                 <div id="numbers-container"></div>
                 <button id="generate-button">Lucky Draw</button>
             </div>

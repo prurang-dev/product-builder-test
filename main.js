@@ -5,12 +5,15 @@ window.switchView = (viewName) => {
     const animalTestComponent = document.querySelector('animal-face-test');
     
     if (viewName === 'animal-test') {
-        // If already in animal test view, reset it
-        if (animalTestView.style.display === 'flex' && animalTestComponent) {
-            animalTestComponent.reset();
-        }
+        // Show animal test view
         homeView.style.display = 'none';
         animalTestView.style.display = 'flex';
+        
+        // Reset component state every time we switch to it via the top button
+        if (animalTestComponent && typeof animalTestComponent.reset === 'function') {
+            animalTestComponent.reset();
+        }
+        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         homeView.style.display = 'flex';
@@ -128,12 +131,14 @@ class AnimalFaceTest extends HTMLElement {
         const labelContainer = this.shadowRoot.getElementById('label-container');
         const fileInput = this.shadowRoot.getElementById('file-input');
         
-        previewContainer.innerHTML = `
-            <span style="font-size: 40px;">📁</span>
-            <div style="color: var(--text-color); font-weight: 600; margin-top: 10px;">사진 클릭하여 업로드</div>
-        `;
-        labelContainer.innerHTML = '';
-        fileInput.value = '';
+        if (previewContainer) {
+            previewContainer.innerHTML = `
+                <span style="font-size: 40px;">📁</span>
+                <div style="color: var(--text-color); font-weight: 600; margin-top: 10px;">사진 클릭하여 업로드</div>
+            `;
+        }
+        if (labelContainer) labelContainer.innerHTML = '';
+        if (fileInput) fileInput.value = '';
     }
 
     async handleFileUpload(event) {
@@ -156,7 +161,7 @@ class AnimalFaceTest extends HTMLElement {
 
     async predict(imageElement) {
         if (!this.model) {
-            alert("모델이 아직 로딩 중입니다. 잠시만 기다려주세요!");
+            alert("모델 로딩 중...");
             return;
         }
         const prediction = await this.model.predict(imageElement);
@@ -165,7 +170,14 @@ class AnimalFaceTest extends HTMLElement {
         const labelContainer = this.shadowRoot.getElementById('label-container');
         labelContainer.innerHTML = '';
 
-        const labelMap = { '강아지': '🐶 강아지상', '고양이': '🐱 고양이상', 'Dog': '🐶 강아지상', 'Cat': '🐱 고양이상' };
+        const labelMap = { 
+            '강아지': '🐶 강아지상', 
+            '고양이': '🐱 고양이상', 
+            'Dog': '🐶 강아지상', 
+            'Cat': '🐱 고양이상',
+            'class1': '🐶 강아지상',
+            'class2': '🐱 고양이상'
+        };
 
         for (let i = 0; i < prediction.length; i++) {
             const rawName = prediction[i].className;
@@ -243,7 +255,6 @@ class ContactForm extends HTMLElement {
                 label { display: block; margin-bottom: 8px; color: var(--text-color); font-weight: 600; font-size: 14px; }
                 input, textarea { width: 100%; padding: 12px; border-radius: 12px; border: 2px solid var(--bg-pattern-color); background: var(--bg-color); color: var(--text-color); font-family: inherit; box-sizing: border-box; }
                 button { width: 100%; background: linear-gradient(135deg, #6e8efb, #a777e3); color: white; border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
-                button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4); }
             </style>
             <div class="container">
                 <h2>제휴 문의</h2>
@@ -291,7 +302,6 @@ class LottoGenerator extends HTMLElement {
                 #numbers-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
                 .number-circle { width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(135deg, #6e8efb, #a777e3); color: white; display: flex; justify-content: center; align-items: center; font-weight: bold; animation: pop 0.5s both; }
                 button { background: linear-gradient(135deg, #00b09b, #96c93d); color: white; border: none; padding: 16px 40px; border-radius: 30px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
-                button:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 176, 155, 0.3); }
                 @keyframes pop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
             </style>
             <div class="container">

@@ -40,6 +40,16 @@ lotto-generator {
     justify-content: center;
 }
 
+.comments-section {
+    width: calc(100% - 40px);
+    max-width: 500px;
+    padding: 40px;
+    background-color: var(--container-bg);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px var(--shadow-color);
+    transition: all var(--transition-speed);
+}
+
 theme-toggle {
     position: fixed;
     top: 20px;

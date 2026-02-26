@@ -21,14 +21,13 @@ This document outlines the design and implementation of a simple, modern, and vi
 *   **Interactive UI:** Modern gradient buttons and animated circles.
 *   **Theme Support:** Dark and Light mode toggle with persistent user preference.
 *   **Partnership Inquiry Form:** Simple contact form integrated with Formspree for business inquiries.
+*   **Community Support:** Integrated Disqus comment system for user feedback and discussion.
 
 ## **Current Plan**
 
-1.  **Implement Partnership Inquiry Form:**
-    *   Create a `<contact-form>` Web Component.
-    *   Integrate with Formspree for form handling.
-    *   Ensure the form supports the current theme (light/dark).
-2.  **Refine Layout:**
-    *   Arrange the generator and the contact form in a vertical stack.
-3.  **Deployment:**
+1.  **Integrate Disqus Comments:**
+    *   Add a dedicated container for Disqus in `index.html`.
+    *   Style the container to match the application's card-based UI.
+    *   Embed the Disqus universal code snippet.
+2.  **Deployment:**
     *   Commit changes and push to the repository.

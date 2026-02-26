@@ -17,11 +17,13 @@
 
 body {
     margin: 0;
+    padding: 80px 20px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    gap: 40px;
     background-color: var(--bg-color);
     background-image: 
         radial-gradient(var(--bg-pattern-color) 0.5px, transparent 0.5px),

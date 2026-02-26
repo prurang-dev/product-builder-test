@@ -148,7 +148,7 @@ class ContactForm extends HTMLElement {
             </style>
             <div class="container">
                 <h2>제휴 문의</h2>
-                <form action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST">
+                <form action="https://formspree.io/f/xojnrkwa" method="POST">
                     <div class="form-group">
                         <label for="name">성함/기업명</label>
                         <input type="text" id="name" name="name" required placeholder="예: 홍길동">

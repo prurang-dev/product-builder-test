@@ -19,16 +19,15 @@ This document outlines the design and implementation of a simple, modern, and vi
 *   **Unique Number Generation:** Generates 6 unique numbers (1-45).
 *   **Sorted Results:** Numbers are automatically sorted in ascending order.
 *   **Interactive UI:** Modern gradient buttons and animated circles.
+*   **Theme Support:** Dark and Light mode toggle with persistent user preference.
 
 ## **Current Plan**
 
-1.  **Refactor to Web Components (`main.js`):**
-    *   Implement `LottoGenerator` class extending `HTMLElement`.
-    *   Use Shadow DOM for styles and structure.
-    *   Add sorting logic to generated numbers.
-2.  **Modernize HTML (`index.html`):**
-    *   Use `<script type="module">`.
-    *   Use the custom `<lotto-generator>` tag.
-3.  **Refined Styling (`style.css`):**
-    *   Update background to a subtle dot pattern.
-    *   Ensure proper centering of the component.
+1.  **Implement Theme Management:**
+    *   Define CSS variables for light and dark themes in `style.css`.
+    *   Create a `<theme-toggle>` Web Component for switching themes.
+    *   Use `localStorage` to persist theme preference.
+2.  **Refactor LottoGenerator for Theming:**
+    *   Update Shadow DOM styles to use CSS variables for dynamic theming.
+3.  **Deployment:**
+    *   Commit changes and push to the repository for deployment.

@@ -60,6 +60,217 @@ class ThemeToggle extends HTMLElement {
 
 customElements.define('theme-toggle', ThemeToggle);
 
+class AnimalFaceTest extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.model = null;
+        this.webcam = null;
+        this.labelContainer = null;
+        this.maxPredictions = 0;
+        this.URL = "https://teachablemachine.withgoogle.com/models/R3hX5qvrI/";
+    }
+
+    connectedCallback() {
+        this.render();
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        const startBtn = this.shadowRoot.getElementById('start-btn');
+        if (startBtn) {
+            startBtn.addEventListener('click', () => this.init());
+        }
+    }
+
+    async init() {
+        const startBtn = this.shadowRoot.getElementById('start-btn');
+        startBtn.disabled = true;
+        startBtn.textContent = "Loading Model...";
+
+        const modelURL = this.URL + "model.json";
+        const metadataURL = this.URL + "metadata.json";
+
+        try {
+            this.model = await tmImage.load(modelURL, metadataURL);
+            this.maxPredictions = this.model.getTotalClasses();
+
+            const flip = true;
+            this.webcam = new tmImage.Webcam(300, 300, flip);
+            await this.webcam.setup();
+            await this.webcam.play();
+            
+            this.shadowRoot.getElementById('placeholder').style.display = 'none';
+            this.shadowRoot.getElementById('webcam-container').appendChild(this.webcam.canvas);
+            
+            this.labelContainer = this.shadowRoot.getElementById('label-container');
+            this.labelContainer.innerHTML = '';
+            for (let i = 0; i < this.maxPredictions; i++) {
+                const barWrapper = document.createElement('div');
+                barWrapper.className = 'bar-wrapper';
+                barWrapper.innerHTML = `
+                    <div class="label-name"></div>
+                    <div class="bar-container">
+                        <div class="bar"></div>
+                    </div>
+                    <div class="percentage">0%</div>
+                `;
+                this.labelContainer.appendChild(barWrapper);
+            }
+
+            startBtn.style.display = 'none';
+            window.requestAnimationFrame(() => this.loop());
+        } catch (error) {
+            console.error(error);
+            startBtn.disabled = false;
+            startBtn.textContent = "Error. Try Again";
+        }
+    }
+
+    async loop() {
+        this.webcam.update();
+        await this.predict();
+        window.requestAnimationFrame(() => this.loop());
+    }
+
+    async predict() {
+        const prediction = await this.model.predict(this.webcam.canvas);
+        for (let i = 0; i < this.maxPredictions; i++) {
+            const classPrediction = prediction[i].className;
+            const probability = (prediction[i].probability * 100).toFixed(0);
+            
+            const wrapper = this.labelContainer.childNodes[i];
+            wrapper.querySelector('.label-name').textContent = classPrediction === '강아지' ? '🐶 강아지상' : '🐱 고양이상';
+            wrapper.querySelector('.bar').style.width = probability + '%';
+            wrapper.querySelector('.percentage').textContent = probability + '%';
+            
+            // Highlight the leading prediction
+            if (prediction[i].probability > 0.5) {
+                wrapper.querySelector('.bar').style.background = 'linear-gradient(90deg, #6e8efb, #a777e3)';
+            } else {
+                wrapper.querySelector('.bar').style.background = '#dee2e6';
+            }
+        }
+    }
+
+    render() {
+        this.shadowRoot.innerHTML = `
+            <style>
+                :host {
+                    display: block;
+                    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+                }
+                .container {
+                    text-align: center;
+                    padding: 40px;
+                    background-color: var(--container-bg);
+                    border-radius: 20px;
+                    box-shadow: 0 20px 40px var(--shadow-color);
+                    max-width: 500px;
+                    width: calc(100% - 80px);
+                    margin: 0 auto;
+                    transition: all var(--transition-speed);
+                }
+                h2 {
+                    color: var(--text-color);
+                    margin-bottom: 10px;
+                    font-weight: 700;
+                }
+                p {
+                    color: var(--text-color);
+                    opacity: 0.7;
+                    margin-bottom: 30px;
+                }
+                #webcam-container {
+                    margin: 0 auto 30px;
+                    border-radius: 15px;
+                    overflow: hidden;
+                    width: 300px;
+                    height: 300px;
+                    background: var(--bg-color);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    box-shadow: inset 0 0 20px var(--shadow-color);
+                }
+                #placeholder {
+                    font-size: 50px;
+                }
+                canvas {
+                    width: 100% !important;
+                    height: 100% !important;
+                }
+                #label-container {
+                    margin-top: 20px;
+                    text-align: left;
+                }
+                .bar-wrapper {
+                    margin-bottom: 15px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                .label-name {
+                    width: 90px;
+                    font-weight: 600;
+                    color: var(--text-color);
+                    font-size: 14px;
+                }
+                .bar-container {
+                    flex-grow: 1;
+                    height: 12px;
+                    background-color: var(--bg-pattern-color);
+                    border-radius: 6px;
+                    overflow: hidden;
+                }
+                .bar {
+                    height: 100%;
+                    width: 0%;
+                    transition: width 0.2s ease, background 0.3s ease;
+                }
+                .percentage {
+                    width: 40px;
+                    text-align: right;
+                    font-size: 13px;
+                    font-weight: bold;
+                    color: var(--text-color);
+                }
+                #start-btn {
+                    background: linear-gradient(135deg, #ff6b6b, #f06595);
+                    color: white;
+                    border: none;
+                    padding: 16px 40px;
+                    font-size: 18px;
+                    font-weight: 600;
+                    border-radius: 30px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 10px 20px rgba(255, 107, 107, 0.2);
+                }
+                #start-btn:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 15px 30px rgba(255, 107, 107, 0.3);
+                }
+                #start-btn:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                }
+            </style>
+            <div class="container">
+                <h2>AI 동물상 테스트</h2>
+                <p>강아지상일까, 고양이상일까? 지금 확인해보세요!</p>
+                <div id="webcam-container">
+                    <div id="placeholder">📷</div>
+                </div>
+                <div id="label-container"></div>
+                <button id="start-btn">테스트 시작하기</button>
+            </div>
+        `;
+    }
+}
+
+customElements.define('animal-face-test', AnimalFaceTest);
+
 class ContactForm extends HTMLElement {
     constructor() {
         super();

@@ -4,7 +4,7 @@
   "description": "Lotto Number Generator",
   "scripts": {
     "build": "mkdir -p dist && cp index.html style.css main.js dist/",
-    "deploy": "npm run build && npx wrangler deploy"
+    "deploy": "npm run build && npx wrangler pages deploy dist --project-name=product-builder-test"
   },
   "author": "",
   "license": "ISC"
